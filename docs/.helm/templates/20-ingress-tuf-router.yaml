@@ -3,6 +3,8 @@
 {{- $host = ( printf "%s.%s" .Values.werf.env (pluck "dev" .Values.host | first | default .Values.host._default ) | lower ) }}
 {{- end }}
 {{- $ingressClassName := pluck .Values.global.env .Values.ingressClassName | first | default .Values.ingressClassName._default | quote }}
+{{- $ruHostPattern := pluck .Values.global.env .Values.ruHostPattern | first | default .Values.ruHostPattern._default }}
+{{- $ruHost := printf $ruHostPattern $host }}
 
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -14,7 +16,7 @@ spec:
   tls:
   - hosts:
       - {{ $host }}
-      - ru.{{ $host }}
+      - {{ $ruHost }}
     secretName: tls-{{ $host }}
   rules:
   - host: {{ $host }}
@@ -34,7 +36,7 @@ spec:
             name: tuf-router
             port:
               name: http
-  - host: ru.{{ $host }}
+  - host: {{ $ruHost }}
     http:
       paths:
       - path: /targets
