@@ -119,11 +119,7 @@ kind: DexAuthenticator
 metadata:
   name: {{ .Chart.Name }}-ru
 spec:
-{{- if eq .Values.global.env "production" }}
   applicationDomain: ru.{{ $host }}
-{{- else }}
-  applicationDomain: ru-{{ $host }}
-{{- end }}
   sendAuthorizationHeader: false
   applicationIngressCertificateSecretName: {{ pluck .Values.global.env .Values.ingressSecretName | first | default .Values.ingressSecretName._default }}
   applicationIngressClassName: "nginx"
