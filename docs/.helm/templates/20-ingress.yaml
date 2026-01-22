@@ -1,7 +1,5 @@
 {{- $host := pluck .Values.global.env .Values.host | first | default .Values.host._default  }}
 {{- $ingressClassName := pluck .Values.global.env .Values.ingressClassName | first | default .Values.ingressClassName._default | quote }}
-{{- $ruHostPattern := pluck .Values.global.env .Values.ruHostPattern | first | default .Values.ruHostPattern._default }}
-{{- $ruHost := printf $ruHostPattern $host }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -53,10 +51,18 @@ spec:
   ingressClassName: {{ $ingressClassName }}
   tls:
   - hosts:
-      - {{ $ruHost }}
+{{- if eq .Values.global.env "production" }}
+      - ru.{{ $host }}
+{{- else }}
+      - ru-{{ $host }}
+{{- end }}
     secretName: tls-{{ $host }}
   rules:
-  - host: {{ $ruHost }}
+{{- if eq .Values.global.env "production" }}
+  - host: ru.{{ $host }}
+{{- else }}
+  - host: ru-{{ $host }}
+{{- end }}
     http:
       paths:
       - path: /
@@ -66,26 +72,24 @@ spec:
             name: {{ .Chart.Name }}
             port:
               number: 80
+{{- if eq .Values.global.env "production" }}
 ---
-# apiVersion: cert-manager.io/v1
-# kind: Certificate
-# metadata:
-#   name: {{ .Chart.Name }}
-# spec:
-#   secretName: tls-{{ $host }}
-#   issuerRef:
-#     kind: ClusterIssuer
-# {{- if hasPrefix "review" .Values.global.env }}
-#     name: letsencrypt-staging
-# {{- else }}
-#     name: letsencrypt-standalone-geo
-# {{- end }}
-#   commonName: {{ $host }}
-#   dnsNames:
-#   - {{ $host }}
-#   - www.{{ $host }}
-#   - {{ $ruHost }}
-# ---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Chart.Name }}
+spec:
+  secretName: tls-{{ $host }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-standalone-geo
+  commonName: {{ $host }}
+  dnsNames:
+  - {{ $host }}
+  - www.{{ $host }}
+  - ru.{{ $host }}
+{{- end }}
+---
 {{- if ne .Values.global.env "production" }}
 apiVersion: deckhouse.io/v1alpha1
 kind: DexAuthenticator
@@ -103,7 +107,11 @@ kind: DexAuthenticator
 metadata:
   name: {{ .Chart.Name }}-ru
 spec:
-  applicationDomain: {{ $ruHost }}
+{{- if eq .Values.global.env "production" }}
+  applicationDomain: ru.{{ $host }}
+{{- else }}
+  applicationDomain: ru-{{ $host }}
+{{- end }}
   sendAuthorizationHeader: false
   applicationIngressCertificateSecretName: tls-{{ $host }}
   applicationIngressClassName: "nginx"

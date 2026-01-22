@@ -10,10 +10,6 @@ ingressClassName:
   _default: "nginx"
   production: "standalone-geo"
 
-ruHostPattern:
-  production: "ru.%s"
-  _default: "ru-%s"
-
 resources:
   requests:
     memory:
