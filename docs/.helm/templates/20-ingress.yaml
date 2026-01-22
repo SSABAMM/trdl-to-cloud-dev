@@ -82,7 +82,11 @@ spec:
   secretName: tls-{{ $host }}
   issuerRef:
     kind: ClusterIssuer
+{{- if hasPrefix "review" .Values.global.env }}
+    name: letsencrypt-staging
+{{- else }}
     name: letsencrypt-standalone-geo
+{{- end }}
   commonName: {{ $host }}
   dnsNames:
   - {{ $host }}
