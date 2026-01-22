@@ -10,6 +10,10 @@ ingressClassName:
   _default: "nginx"
   production: "standalone-geo"
 
+ingressSecretName:
+  _default: "wildcard-test-flant-dev"
+  production: "tls-trdl.dev"
+
 resources:
   requests:
     memory:

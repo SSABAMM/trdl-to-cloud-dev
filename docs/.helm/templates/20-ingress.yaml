@@ -21,7 +21,11 @@ spec:
 {{- if eq .Values.global.env "production" }}
       - www.{{ $host }}
 {{- end }}
+{{- if eq .Values.global.env "production" }}
     secretName: tls-{{ $host }}
+{{- else }}
+    secretName: {{ pluck .Values.global.env .Values.ingressSecretName | first | default .Values.ingressSecretName._default }}
+{{- end }}
   rules:
   - host: {{ $host }}
     http:
@@ -56,7 +60,11 @@ spec:
 {{- else }}
       - ru-{{ $host }}
 {{- end }}
+{{- if eq .Values.global.env "production" }}
     secretName: tls-{{ $host }}
+{{- else }}
+    secretName: {{ pluck .Values.global.env .Values.ingressSecretName | first | default .Values.ingressSecretName._default }}
+{{- end }}
   rules:
 {{- if eq .Values.global.env "production" }}
   - host: ru.{{ $host }}
@@ -102,7 +110,7 @@ metadata:
 spec:
   applicationDomain: {{ $host }}
   sendAuthorizationHeader: false
-  applicationIngressCertificateSecretName: tls-{{ $host }}
+  applicationIngressCertificateSecretName: {{ pluck .Values.global.env .Values.ingressSecretName | first | default .Values.ingressSecretName._default }}
   applicationIngressClassName: "nginx"
   keepUsersLoggedInFor: "720h"
 ---
@@ -117,7 +125,7 @@ spec:
   applicationDomain: ru-{{ $host }}
 {{- end }}
   sendAuthorizationHeader: false
-  applicationIngressCertificateSecretName: tls-{{ $host }}
+  applicationIngressCertificateSecretName: {{ pluck .Values.global.env .Values.ingressSecretName | first | default .Values.ingressSecretName._default }}
   applicationIngressClassName: "nginx"
   keepUsersLoggedInFor: "720h"
 {{- end }}

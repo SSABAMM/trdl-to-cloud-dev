@@ -19,7 +19,11 @@ spec:
 {{- else }}
       - ru-{{ $host }}
 {{- end }}
+{{- if eq .Values.global.env "production" }}
     secretName: tls-{{ $host }}
+{{- else }}
+    secretName: {{ pluck .Values.global.env .Values.ingressSecretName | first | default .Values.ingressSecretName._default }}
+{{- end }}
   rules:
   - host: {{ $host }}
     http:
