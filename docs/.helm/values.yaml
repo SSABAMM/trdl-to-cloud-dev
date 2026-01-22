@@ -12,7 +12,6 @@ ingressClassName:
 
 ingressSecretName:
   _default: "wildcard-test-flant-dev"
-  production: "tls-trdl.dev"
 
 resources:
   requests:
